@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Smart Diet Calculator</title>
+  <style>
+    :root{--bg:#0b1220;--card:#121a2b;--acc:#34d399;--muted:#9aa4b2}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#0b1220,#0e1526);color:#e5e7eb}
+    .wrap{max-width:850px;margin:40px auto;padding:24px}
+    .card{background:var(--card);border:1px solid #1f2a44;border-radius:16px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+    h1{margin:0 0 6px;font-size:30px}
+    p.lead{margin:0 0 18px;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+    @media (max-width:700px){.grid{grid-template-columns:1fr}}
+    label{font-size:14px;color:#c7d2fe}
+    input,select{width:100%;padding:12px 14px;margin-top:6px;border:1px solid #243152;background:#0b1220;color:#e5e7eb;border-radius:10px;outline:none}
+    .row{display:flex;gap:10px;align-items:center}
+    .btn{cursor:pointer;background:var(--acc);color:#082c1f;border:0;padding:12px 16px;border-radius:12px;font-weight:700}
+    .btn.secondary{background:#1f2a44;color:#cbd5e1}
+    .muted{color:var(--muted)}
+    .result{margin-top:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    @media (max-width:700px){.result{grid-template-columns:1fr}}
+    .pill{background:#0b1220;border:1px solid #243152;border-radius:12px;padding:14px}
+    .pill h3{margin:0 0 8px;font-size:14px;color:#9dd6c3;font-weight:600;letter-spacing:.3px}
+    .big{font-size:24px;font-weight:800}
+    .foot{margin-top:12px;color:var(--muted);font-size:12px}
+    .badge{display:inline-block;background:#0b1220;border:1px solid #243152;border-radius:999px;padding:6px 10px;margin-right:6px}
+    .ok{border-color:#265;box-shadow:0 0 0 3px rgba(52,211,153,.15)}
+    .err{color:#fecaca}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Smart Diet Calculator</h1>
+      <p class="lead">Get calories & macros tailored to your lifestyle and goal.</p>
+
+      <div class="grid" id="form">
+        <div>
+          <label>Age</label>
+          <input id="age" type="number" min="10" max="99" placeholder="e.g. 24" />
+        </div>
+        <div>
+          <label>Sex</label>
+          <select id="sex">
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+        </div>
+        <div>
+          <label>Height (cm)</label>
+          <input id="height" type="number" min="100" max="230" placeholder="e.g. 178" />
+        </div>
+        <div>
+          <label>Weight (kg)</label>
+          <input id="weight" type="number" min="35" max="250" placeholder="e.g. 75" />
+        </div>
+        <div>
+          <label>Activity</label>
+          <select id="activity">
+            <option value="1.2">Sedentary (desk job)</option>
+            <option value="1.375">Light (1–3 workouts/week)</option>
+            <option value="1.55">Moderate (3–5 workouts/week)</option>
+            <option value="1.725">Active (6–7 workouts/week)</option>
+            <option value="1.9">Very active (physical job + training)</option>
+          </select>
+        </div>
+        <div>
+          <label>Goal</label>
+          <select id="goal">
+            <option value="lose">Lose fat</option>
+            <option value="maintain">Maintain</option>
+            <option value="gain">Build muscle</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:18px">
+        <button class="btn" id="calc">Calculate</button>
+        <button class="btn secondary" id="save">Save inputs</button>
+        <span class="muted" id="msg" style="margin-left:8px"></span>
+      </div>
+
+      <div class="result" id="out" style="display:none">
+        <div class="pill ok">
+          <h3>Daily Calories</h3>
+          <div class="big" id="kcal">—</div>
+          <div class="foot" id="tdeeNote"></div>
+        </div>
+        <div class="pill">
+          <h3>Protein</h3>
+          <div class="big" id="prot">—</div>
+          <div class="foot muted" id="protNote"></div>
+        </div>
+        <div class="pill">
+          <h3>Fats</h3>
+          <div class="big" id="fat">—</div>
+          <div class="foot muted" id="fatNote"></div>
+        </div>
+        <div class="pill">
+          <h3>Carbs</h3>
+          <div class="big" id="carb">—</div>
+          <div class="foot muted" id="carbNote"></div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px" id="badges"></div>
+      <p class="foot">Uses Mifflin–St Jeor for BMR. Educational use only.</p>
+    </div>
+  </div>
+
+  <script>
+    const el = id => document.getElementById(id);
+    const fmt = (n, d=0) => Number(n).toFixed(d);
+
+    // Load saved inputs
+    (function(){
+      const saved = JSON.parse(localStorage.getItem("diet_inputs
